@@ -826,46 +826,46 @@ contract BaoBeyToken is ERC20, Ownable {
     ) internal override {
         require(amount > 0, "Transfer amount must be greater than zero");
 
-        if (transfer_delay_enabled) {
-            if (
-                from != owner() &&
-                to != owner() &&
-                to != address(0) &&
-                to != _dead_wallet
-            ) {
-                if (automated_market_maker_pairs[from]) {
-                    require(
-                        tx.gasprice <= _gas_price_limit,
-                        "_transfer: Gas price exceeds limit"
-                    );
-                }
-
-                if (
-                    to != address(uniswapV2Router) &&
-                    to != uniswap_v2_pair &&
-                    from != address(uniswapV2Router) &&
-                    from != uniswap_v2_pair
-                ) {
-                    require(
-                        _holder_last_transfer_timestamp[_msgSender()] <
-                            block.number,
-                        "_transfer: Transfer Delay is enabled"
-                    );
-                    _holder_last_transfer_timestamp[_msgSender()] = block
-                        .number;
-                }
-            }
-        }
-
         if (
             automated_market_maker_pairs[from] ||
             automated_market_maker_pairs[to]
         ) {
+            if (transfer_delay_enabled) {
+                if (
+                    from != owner() &&
+                    to != owner() &&
+                    to != address(0) &&
+                    to != _dead_wallet
+                ) {
+                    if (automated_market_maker_pairs[from]) {
+                        require(
+                            tx.gasprice <= _gas_price_limit,
+                            "_transfer: Gas price exceeds limit"
+                        );
+                    }
+
+                    if (
+                        to != address(uniswapV2Router) &&
+                        to != uniswap_v2_pair &&
+                        from != address(uniswapV2Router) &&
+                        from != uniswap_v2_pair
+                    ) {
+                        require(
+                            _holder_last_transfer_timestamp[_msgSender()] <
+                                block.number,
+                            "_transfer: Transfer Delay is enabled"
+                        );
+                        _holder_last_transfer_timestamp[_msgSender()] = block
+                            .number;
+                    }
+                }
+            }
             processTransferAmount(from, to, amount);
         } else {
             super._transfer(from, to, amount);
         }
     }
+        
 
     //internal
     function _setAutomatedMarketMakerPair(address pair, bool value) internal {
