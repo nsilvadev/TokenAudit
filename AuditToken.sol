@@ -5,9 +5,197 @@ interface IUniswapV2Router01 {
     function factory() external pure returns (address);
 
     function WETH() external pure returns (address);
+
+    function addLiquidity(
+        address tokenA,
+        address tokenB,
+        uint amountADesired,
+        uint amountBDesired,
+        uint amountAMin,
+        uint amountBMin,
+        address to,
+        uint deadline
+    ) external returns (uint amountA, uint amountB, uint liquidity);
+
+    function addLiquidityETH(
+        address token,
+        uint amountTokenDesired,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    )
+        external
+        payable
+        returns (uint amountToken, uint amountETH, uint liquidity);
+
+    function removeLiquidity(
+        address tokenA,
+        address tokenB,
+        uint liquidity,
+        uint amountAMin,
+        uint amountBMin,
+        address to,
+        uint deadline
+    ) external returns (uint amountA, uint amountB);
+
+    function removeLiquidityETH(
+        address token,
+        uint liquidity,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    ) external returns (uint amountToken, uint amountETH);
+
+    function removeLiquidityWithPermit(
+        address tokenA,
+        address tokenB,
+        uint liquidity,
+        uint amountAMin,
+        uint amountBMin,
+        address to,
+        uint deadline,
+        bool approveMax,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external returns (uint amountA, uint amountB);
+
+    function removeLiquidityETHWithPermit(
+        address token,
+        uint liquidity,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline,
+        bool approveMax,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external returns (uint amountToken, uint amountETH);
+
+    function swapExactTokensForTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external returns (uint[] memory amounts);
+
+    function swapTokensForExactTokens(
+        uint amountOut,
+        uint amountInMax,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external returns (uint[] memory amounts);
+
+    function swapExactETHForTokens(
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external payable returns (uint[] memory amounts);
+
+    function swapTokensForExactETH(
+        uint amountOut,
+        uint amountInMax,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external returns (uint[] memory amounts);
+
+    function swapExactTokensForETH(
+        uint amountIn,
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external returns (uint[] memory amounts);
+
+    function swapETHForExactTokens(
+        uint amountOut,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external payable returns (uint[] memory amounts);
+
+    function quote(
+        uint amountA,
+        uint reserveA,
+        uint reserveB
+    ) external pure returns (uint amountB);
+
+    function getAmountOut(
+        uint amountIn,
+        uint reserveIn,
+        uint reserveOut
+    ) external pure returns (uint amountOut);
+
+    function getAmountIn(
+        uint amountOut,
+        uint reserveIn,
+        uint reserveOut
+    ) external pure returns (uint amountIn);
+
+    function getAmountsOut(
+        uint amountIn,
+        address[] calldata path
+    ) external view returns (uint[] memory amounts);
+
+    function getAmountsIn(
+        uint amountOut,
+        address[] calldata path
+    ) external view returns (uint[] memory amounts);
 }
 
-interface IUniswapV2Router02 is IUniswapV2Router01 {}
+interface IUniswapV2Router02 is IUniswapV2Router01 {
+    function removeLiquidityETHSupportingFeeOnTransferTokens(
+        address token,
+        uint liquidity,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline
+    ) external returns (uint amountETH);
+
+    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
+        address token,
+        uint liquidity,
+        uint amountTokenMin,
+        uint amountETHMin,
+        address to,
+        uint deadline,
+        bool approveMax,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external returns (uint amountETH);
+
+    function swapExactTokensForTokensSupportingFeeOnTransferTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external;
+
+    function swapExactETHForTokensSupportingFeeOnTransferTokens(
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external payable;
+
+    function swapExactTokensForETHSupportingFeeOnTransferTokens(
+        uint amountIn,
+        uint amountOutMin,
+        address[] calldata path,
+        address to,
+        uint deadline
+    ) external;
+}
 
 interface IUniswapV2Factory {
     event PairCreated(
@@ -586,63 +774,49 @@ abstract contract Ownable is Context {
     }
 }
 
-contract AuditToken is ERC20, Ownable {
+contract BaoBeyToken is ERC20, Ownable {
     address private constant _dead_wallet =
-        address(0x000000000000000000000000000000000000dEaD);
+        0x000000000000000000000000000000000000dEaD;
 
     address public constant marketing_wallet =
-        0x2416dE63649745d5f87CefA34Ba11b9A622eBCF2;
+        0x73829CDA55E4A609b937e9A213ebd39E49798166;
 
     address public constant mint_wallet =
-        0x7E9eB17eCCed784b9980A9c8aE4cab80AF4bE505;
+        0x380F3734C32F0ef998955E5d57BA1E69f7a5DD4f;
 
     address constant pancake_router =
-        0x10ED43C718714eb63d5aA57B78B54704E256024E; 
+        0x10ED43C718714eb63d5aA57B78B54704E256024E;
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswap_v2_pair;
 
     bool public transfer_delay_enabled = true;
-    bool public limits_in_effect = true;
-    bool private _gas_limit_active = true;
-    bool public trading_enabled = false;
-    bool public init_exec = false;
 
-    mapping(address => bool) private _is_excluded_from_tax;
     mapping(address => uint256) private _holder_last_transfer_timestamp;
     mapping(address => bool) public automated_market_maker_pairs;
 
     uint8 public constant burn_amount_tax = 1;
     uint8 public constant marketing_amount_tax = 4;
-    uint256 private _gas_price_limit = 70 * 1 gwei;
+    uint256 private constant _gas_price_limit = 70 * 1 gwei;
 
     modifier marketingOrOwner() {
         require(
             marketing_wallet == _msgSender() || owner() == _msgSender(),
-            "Caller is not the alternative address or owner."
+            "Caller is not the marketing_wallet address or owner."
         );
         _;
     }
+    event DisableTransferDelay();
+    event AutomatedMarketMakerPair(address _pair, bool _value);
 
-    constructor() payable ERC20("Audit", "AA") {
+    constructor() ERC20("BaoBey", "BeBe") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
             pancake_router
         );
         uniswapV2Router = _uniswapV2Router;
-        _mint( mint_wallet , (130 * 10 ** 9) * (10 ** uint256(decimals())));
+        _mint(mint_wallet, (130 * 10 ** 9) * (10 ** uint256(decimals())));
         uniswap_v2_pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
-    }
-
-    receive() external payable {}
-
-    function init() public onlyOwner {
-        require(!init_exec, "init: already invoked");
-        _setAutomatedMarketMakerPair(address(uniswap_v2_pair), true);
-        _is_excluded_from_tax[marketing_wallet] = true;
-        _is_excluded_from_tax[msg.sender] = true;
-        _is_excluded_from_tax[address(0xdead)] = true;
-
-        init_exec = true;
+        _setAutomatedMarketMakerPair(uniswap_v2_pair, true);
     }
 
     function _transfer(
@@ -650,63 +824,58 @@ contract AuditToken is ERC20, Ownable {
         address to,
         uint256 amount
     ) internal override {
-        require(from != address(0), "ERC20: transfer from the zero address");
-        require(to != address(0), "ERC20: transfer to the zero address");
         require(amount > 0, "Transfer amount must be greater than zero");
-        bool takeFee = true;
 
-        if (limits_in_effect && trading_enabled) {
+        if (transfer_delay_enabled) {
             if (
                 from != owner() &&
                 to != owner() &&
                 to != address(0) &&
-                to != address(0xdead)
+                to != _dead_wallet
             ) {
-                if (_gas_limit_active && automated_market_maker_pairs[from]) {
+                if (automated_market_maker_pairs[from]) {
                     require(
                         tx.gasprice <= _gas_price_limit,
                         "_transfer: Gas price exceeds limit"
                     );
                 }
 
-                if (transfer_delay_enabled) {
-                    if (
-                        to != address(uniswapV2Router) &&
-                        to != address(uniswap_v2_pair)
-                    ) {
-                        require(
-                            _holder_last_transfer_timestamp[_msgSender()] <
-                                block.number,
-                            "_transfer: Transfer Delay is enabled"
-                        );
-                        _holder_last_transfer_timestamp[_msgSender()] = block
-                            .number;
-                    }
+                if (
+                    to != address(uniswapV2Router) &&
+                    to != uniswap_v2_pair &&
+                    from != address(uniswapV2Router) &&
+                    from != uniswap_v2_pair
+                ) {
+                    require(
+                        _holder_last_transfer_timestamp[_msgSender()] <
+                            block.number,
+                        "_transfer: Transfer Delay is enabled"
+                    );
+                    _holder_last_transfer_timestamp[_msgSender()] = block
+                        .number;
                 }
             }
-        }
-
-        if (_is_excluded_from_tax[from] || _is_excluded_from_tax[to]) {
-            takeFee = false;
         }
 
         if (
             automated_market_maker_pairs[from] ||
             automated_market_maker_pairs[to]
         ) {
-            if (takeFee) {
-                require(
-                    trading_enabled,
-                    "Cannot trade: Trading is not enabled"
-                );
-
-                processTransferAmount(from, to, amount);
-            } else {
-                super._transfer(from, to, amount);
-            }
+            processTransferAmount(from, to, amount);
         } else {
             super._transfer(from, to, amount);
         }
+    }
+
+    //internal
+    function _setAutomatedMarketMakerPair(address pair, bool value) internal {
+        require(
+            automated_market_maker_pairs[pair] != value,
+            "Automated market maker pair is already set to that value"
+        );
+        automated_market_maker_pairs[pair] = value;
+
+        emit AutomatedMarketMakerPair(pair, value);
     }
 
     function processTransferAmount(
@@ -723,22 +892,10 @@ contract AuditToken is ERC20, Ownable {
         super._transfer(from, to, _amount);
     }
 
-    // public devOrOwner
-    function removeLimits() public marketingOrOwner {
-        limits_in_effect = false;
-        _gas_limit_active = false;
-        transfer_delay_enabled = false;
-    }
-
+    // public marketingOrOwner
     function disableTransferDelay() public marketingOrOwner {
         transfer_delay_enabled = false;
-    }
-
-    function setIsExcludedFromTax(
-        address _address,
-        bool value
-    ) public marketingOrOwner {
-        _is_excluded_from_tax[_address] = value;
+        emit DisableTransferDelay();
     }
 
     function setAutomatedMarketMakerPair(
@@ -746,27 +903,9 @@ contract AuditToken is ERC20, Ownable {
         bool value
     ) public marketingOrOwner {
         require(
-            pair != address(uniswap_v2_pair),
+            pair != uniswap_v2_pair,
             "Cannot Remove: Pancakeswap pair cannot be removed"
         );
         _setAutomatedMarketMakerPair(pair, value);
-    }
-
-    //public onlyOwner
-    function enableTrading() public onlyOwner {
-        require(
-            !trading_enabled,
-            "Cannot Change: Trading has already been enabled"
-        );
-        trading_enabled = true;
-    }
-
-    //internal
-    function _setAutomatedMarketMakerPair(address pair, bool value) internal {
-        require(
-            automated_market_maker_pairs[pair] != value,
-            "Automated market maker pair is already set to that value"
-        );
-        automated_market_maker_pairs[pair] = value;
     }
 }
