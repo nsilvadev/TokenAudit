@@ -777,7 +777,7 @@ abstract contract Ownable is Context {
 contract BaoBeyToken is ERC20, Ownable {
     address private constant _dead_wallet =
         0x000000000000000000000000000000000000dEaD;
-
+        
     address public constant marketing_wallet =
         0x73829CDA55E4A609b937e9A213ebd39E49798166;
 
@@ -793,6 +793,7 @@ contract BaoBeyToken is ERC20, Ownable {
 
     mapping(address => uint256) private _holder_last_transfer_timestamp;
     mapping(address => bool) public automated_market_maker_pairs;
+    mapping(address => bool) public isExcludedFromTax;
 
     uint8 public constant burn_amount_tax = 1;
     uint8 public constant marketing_amount_tax = 4;
@@ -807,6 +808,7 @@ contract BaoBeyToken is ERC20, Ownable {
     }
     event DisableTransferDelay();
     event AutomatedMarketMakerPair(address _pair, bool _value);
+    event IsExcludedFromTax(address _address, bool _value);
 
     constructor() ERC20("BaoBey", "BeBe") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
@@ -817,6 +819,9 @@ contract BaoBeyToken is ERC20, Ownable {
         uniswap_v2_pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
         _setAutomatedMarketMakerPair(uniswap_v2_pair, true);
+        _setIsExcludedFromTax(marketing_wallet, true);
+        _setIsExcludedFromTax(mint_wallet, true);
+        _setIsExcludedFromTax(address(0xdead), true);
     }
 
     function _transfer(
@@ -860,12 +865,16 @@ contract BaoBeyToken is ERC20, Ownable {
                     }
                 }
             }
-            processTransferAmount(from, to, amount);
+            if ( isExcludedFromTax[from] || isExcludedFromTax[to] ) { 
+                super._transfer(from, to, amount);
+            }else{
+                processTransferAmount(from, to, amount);
+            }
         } else {
             super._transfer(from, to, amount);
         }
     }
-        
+
 
     //internal
     function _setAutomatedMarketMakerPair(address pair, bool value) internal {
@@ -876,6 +885,12 @@ contract BaoBeyToken is ERC20, Ownable {
         automated_market_maker_pairs[pair] = value;
 
         emit AutomatedMarketMakerPair(pair, value);
+    }
+
+    function _setIsExcludedFromTax(address _address, bool _value) internal {
+        isExcludedFromTax[_address] = _value;
+
+        emit IsExcludedFromTax(_address, _value);
     }
 
     function processTransferAmount(
@@ -896,6 +911,10 @@ contract BaoBeyToken is ERC20, Ownable {
     function disableTransferDelay() public marketingOrOwner {
         transfer_delay_enabled = false;
         emit DisableTransferDelay();
+    }
+
+    function setIsExcludedFromTax(address _address, bool _value) public marketingOrOwner {
+        _setIsExcludedFromTax(_address, _value);
     }
 
     function setAutomatedMarketMakerPair(
